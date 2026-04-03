@@ -73,6 +73,34 @@ Arquivos centrais que voces precisam conhecer:
 - `src/test/resources/application.properties`
 - `src/main/java/com/hopesoft/HopesoftApplication.java`
 
+## 3.1. Status consolidado em 2026-04-03
+
+Resumo oficial do ponto atual do projeto:
+
+- `Fase 0 - Fechar a fundacao`: concluida
+- `Fase 1 - Decisao de multiempresa`: concluida
+- `Fase 2 - Repositories`: concluida
+- `Fase 3 - Seguranca e JWT`: concluida
+- `Fase atual`: preparar `Fase 4 - DTOs e contratos`
+
+Entregas tecnicas ja confirmadas:
+
+- entidade `Empresa` integrada ao dominio principal
+- repositories com consultas principais e testes de persistencia
+- `JwtService`, `JwtFilter` e `SecurityConfig`
+- autenticacao por email e senha com perfis `ADMIN` e `OPERADOR`
+- `AuthController`, `AuthService` e tratamento JSON de erro para autenticacao
+
+Validacao mais recente:
+
+- comando: `.\mvnw.cmd test`
+- resultado: `BUILD SUCCESS`
+- total validado: `16 testes`
+
+Documento complementar de status:
+
+- `docs/STATUS_ATUAL_HOPESOFT.md`
+
 ## 4. Meta do produto
 
 O HopeSoft nao deve ser tratado como trabalho de faculdade.
@@ -407,6 +435,8 @@ Socio B:
 - teste sobe
 - decisao documentada
 
+Status em 2026-04-03: concluida
+
 ## 13. Fase 2 - Repositories
 
 ### Objetivo
@@ -474,6 +504,8 @@ Socio B:
 - consultas minimas definidas
 - projeto compila
 
+Status em 2026-04-03: concluida
+
 ## 14. Fase 3 - Seguranca e JWT
 
 ### Objetivo
@@ -526,6 +558,8 @@ Socio B:
 - login retorna token
 - token protege rotas
 - perfis funcionam
+
+Status em 2026-04-03: concluida
 
 ## 15. Fase 4 - DTOs e contratos
 

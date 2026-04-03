@@ -13,7 +13,7 @@ Ele foi escrito para:
 
 Leitura complementar importante:
 
-- `.docs/GUIA_GITHUB_DUPLA_INICIANTES.md`
+- `docs/GUIA_GITHUB_DUPLA_INICIANTES.md`
 
 ## Estado atual do projeto
 
@@ -41,6 +41,23 @@ Hoje o HopeSoft ja possui:
   - `ItemVenda`
   - `Perfil`
   - `FormaPagamento`
+
+## Status consolidado em 2026-04-03
+
+Status das fases deste guia:
+
+- `Fase 0 - Fundacao do produto`: concluida
+- `Fase 1 - Persistencia e dominio`: concluida
+- `Fase 2 - Seguranca e acesso`: concluida
+- `Proxima fase`: `Fase 3 - DTOs e contratos da API`
+
+Entregas que ja estao prontas no codigo:
+
+- entidade `Empresa` integrada ao dominio principal
+- repositories com consultas principais e cobertura de persistencia
+- login JWT com perfis `ADMIN` e `OPERADOR`
+- `AuthController`, `AuthService` e tratamento JSON de erro para autenticacao
+- `.\mvnw.cmd test` validando o projeto com `16` testes verdes
 
 ## Meta de negocio
 
@@ -128,7 +145,7 @@ Se voces nao quiserem implementar multiempresa agora, pelo menos reservem essa d
 
 ## Fase 0 - Fundacao do produto
 
-Status: parcialmente concluida
+Status: concluida
 
 Ja foi feito:
 
@@ -158,6 +175,8 @@ Divisao sugerida:
 
 ## Fase 1 - Persistencia e dominio
 
+Status: concluida
+
 Objetivo:
 
 transformar os modelos ja existentes em base de dados funcional
@@ -183,6 +202,8 @@ Divisao em dupla:
 - Socio B: mapear consultas necessarias para telas e operacao real da loja
 
 ## Fase 2 - Seguranca e acesso
+
+Status: concluida
 
 Objetivo:
 
@@ -417,7 +438,7 @@ Entregas de produto que vao ganhar peso:
 
 Se voces ainda sao iniciantes com Git e GitHub, usem junto deste documento o guia:
 
-- `.docs/GUIA_GITHUB_DUPLA_INICIANTES.md`
+- `docs/GUIA_GITHUB_DUPLA_INICIANTES.md`
 
 ## Ritual semanal
 
@@ -457,18 +478,16 @@ Uma tarefa so entra como concluida quando:
 
 ## Backlog imediato recomendado
 
-Ordem sugerida para os proximos passos reais no HopeSoft:
+Ordem sugerida para os proximos passos reais no HopeSoft a partir do estado atual:
 
-1. decidir se voces vao introduzir `Empresa/Tenant` agora
-2. criar repositories
-3. criar seguranca e JWT
-4. criar DTOs
-5. criar services
-6. criar controllers
-7. criar seed do admin
-8. criar frontend minimo
-9. criar docker
-10. rodar piloto com loja real
+1. fechar DTOs e contratos da API
+2. implementar services de produto, venda e relatorio
+3. expor controllers principais
+4. criar seed do admin inicial
+5. montar colecao Postman oficial
+6. criar frontend minimo
+7. preparar Docker
+8. rodar piloto com loja real
 
 ## Divisao pratica do backlog imediato
 
@@ -476,16 +495,15 @@ Se quiserem comecar ja em paralelo:
 
 ### Frente do Socio A
 
-- repositories
-- seguranca JWT
+- DTOs e validacoes
 - services
 - configuracao de banco e docker
 
 ### Frente do Socio B
 
 - documentacao de payloads
+- colecao Postman
 - rascunho de telas
-- fluxo de login
 - tela de produtos
 - tela de caixa
 - cenarios de teste manual

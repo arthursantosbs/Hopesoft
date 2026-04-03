@@ -366,6 +366,22 @@ Exemplo:
 - o PR esta pequeno o suficiente?
 - nao vai quebrar a branch `develop`?
 
+## Exemplo do ponto atual do HopeSoft
+
+Hoje o projeto ja fechou multiempresa, repositories e seguranca JWT.
+
+As proximas branches pequenas e saudaveis para voces abrirem sao:
+
+- `feat/dtos-produto-venda`
+- `feat/services-produto-venda-relatorio`
+- `feat/controllers-api-inicial`
+- `docs/status-atual-projeto`
+
+Uma boa divisao agora seria:
+
+- Socio A fica com `dto`, `service` e ajustes de seguranca
+- Socio B fica com Postman, validacao de payload, telas e documentacao funcional
+
 ## Conclusao
 
 Para voces, o melhor caminho e simplicidade com disciplina.
