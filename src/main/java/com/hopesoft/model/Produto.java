@@ -23,6 +23,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Produto {
+    @ManyToOne
+    @JoinColumn(name = "empresa_id", nullable = false)
+    private Empresa empresa;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

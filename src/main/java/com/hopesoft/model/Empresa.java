@@ -1,7 +1,12 @@
 package com.hopesoft.model;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,16 +15,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "empresas")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Usuario {
-    @ManyToOne
-    @JoinColumn(name = "empresa_id", nullable = false)
-    private Empresa empresa;
+public class Empresa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,14 +31,11 @@ public class Usuario {
     private String nome;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String cnpj;
 
     @Column(nullable = false)
-    private String senha;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Perfil perfil;
+    @Builder.Default
+    private Boolean ativa = true;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
