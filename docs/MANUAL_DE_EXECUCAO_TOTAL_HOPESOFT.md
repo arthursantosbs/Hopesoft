@@ -81,7 +81,8 @@ Resumo oficial do ponto atual do projeto:
 - `Fase 1 - Decisao de multiempresa`: concluida
 - `Fase 2 - Repositories`: concluida
 - `Fase 3 - Seguranca e JWT`: concluida
-- `Fase atual`: preparar `Fase 4 - DTOs e contratos`
+- `Fase 4 - DTOs e contratos`: concluida
+- `Fase atual`: preparar `Fase 5 - Services e regras de negocio`
 
 Entregas tecnicas ja confirmadas:
 
@@ -90,12 +91,14 @@ Entregas tecnicas ja confirmadas:
 - `JwtService`, `JwtFilter` e `SecurityConfig`
 - autenticacao por email e senha com perfis `ADMIN` e `OPERADOR`
 - `AuthController`, `AuthService` e tratamento JSON de erro para autenticacao
+- contratos de produto, venda e relatorio com Bean Validation
+- exemplos de payload em `docs/EXEMPLOS_DE_PAYLOADS_API.md`
 
 Validacao mais recente:
 
 - comando: `.\mvnw.cmd test`
 - resultado: `BUILD SUCCESS`
-- total validado: `16 testes`
+- total validado: `22 testes`
 
 Documento complementar de status:
 
@@ -562,6 +565,8 @@ Socio B:
 Status em 2026-04-03: concluida
 
 ## 15. Fase 4 - DTOs e contratos
+
+Status em 2026-04-03: concluida
 
 ### Objetivo
 

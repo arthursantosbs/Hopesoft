@@ -49,7 +49,8 @@ Status das fases deste guia:
 - `Fase 0 - Fundacao do produto`: concluida
 - `Fase 1 - Persistencia e dominio`: concluida
 - `Fase 2 - Seguranca e acesso`: concluida
-- `Proxima fase`: `Fase 3 - DTOs e contratos da API`
+- `Fase 3 - DTOs e contratos da API`: concluida
+- `Proxima fase`: `Fase 4 - Services e regras de negocio`
 
 Entregas que ja estao prontas no codigo:
 
@@ -57,7 +58,9 @@ Entregas que ja estao prontas no codigo:
 - repositories com consultas principais e cobertura de persistencia
 - login JWT com perfis `ADMIN` e `OPERADOR`
 - `AuthController`, `AuthService` e tratamento JSON de erro para autenticacao
-- `.\mvnw.cmd test` validando o projeto com `16` testes verdes
+- DTOs de produto, venda e relatorio com Bean Validation
+- arquivo de apoio com payloads em `docs/EXEMPLOS_DE_PAYLOADS_API.md`
+- `.\mvnw.cmd test` validando o projeto com `22` testes verdes
 
 ## Meta de negocio
 
@@ -230,6 +233,8 @@ Divisao em dupla:
 
 ## Fase 3 - DTOs e contratos da API
 
+Status: concluida
+
 Objetivo:
 
 impedir que controllers exponham entidades cruas e consolidar os contratos do sistema
@@ -243,6 +248,7 @@ Entregas:
 - `ItemVendaRequest`
 - `RelatorioDiaResponse`
 - possiveis DTOs extras de resposta para produto e venda
+- arquivo de exemplos de payload em `docs/EXEMPLOS_DE_PAYLOADS_API.md`
 
 Criterio de pronto:
 

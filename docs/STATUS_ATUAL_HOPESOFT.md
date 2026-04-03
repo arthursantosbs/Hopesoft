@@ -10,8 +10,9 @@ O HopeSoft encerrou com sucesso a base estrutural do backend inicial:
 - modelagem multiempresa introduzida cedo
 - repositories implementados e testados
 - seguranca JWT funcionando com controle de perfil
+- DTOs e contratos da API definidos com validacao
 
-No estado atual, o projeto ja possui login com token, protecao de rotas e validacao automatizada dos principais blocos tecnicos construidos ate aqui.
+No estado atual, o projeto ja possui login com token, protecao de rotas, contratos previsiveis de entrada e saida e validacao automatizada dos principais blocos tecnicos construidos ate aqui.
 
 ## Em que etapa o projeto esta
 
@@ -21,14 +22,16 @@ Leitura pelo manual detalhado:
 - `Fase 1 - Decisao de multiempresa`: concluida
 - `Fase 2 - Repositories`: concluida
 - `Fase 3 - Seguranca e JWT`: concluida
-- `Fase atual`: preparar `Fase 4 - DTOs e contratos`
+- `Fase 4 - DTOs e contratos`: concluida
+- `Fase atual`: preparar `Fase 5 - Services e regras de negocio`
 
 Leitura pelo guia resumido:
 
 - `Fase 0 - Fundacao do produto`: concluida
 - `Fase 1 - Persistencia e dominio`: concluida
 - `Fase 2 - Seguranca e acesso`: concluida
-- `Fase atual`: preparar `Fase 3 - DTOs e contratos da API`
+- `Fase 3 - DTOs e contratos da API`: concluida
+- `Fase atual`: preparar `Fase 4 - Services e regras de negocio`
 
 ## O que ja foi concluido
 
@@ -63,9 +66,19 @@ Leitura pelo guia resumido:
 - `LoginRequest`
 - `LoginResponse`
 - `AuthenticatedUserResponse`
+- `ProdutoRequest`
+- `ProdutoResponse`
+- `CategoriaResponse`
+- `ItemVendaRequest`
+- `ItemVendaResponse`
+- `VendaRequest`
+- `VendaResponse`
+- `RelatorioDiaResponse`
+- `RelatorioFormaPagamentoResponse`
 - `AuthService`
 - `AuthController`
 - `GlobalExceptionHandler` para validacao e autenticacao
+- arquivo de apoio com payloads em `docs/EXEMPLOS_DE_PAYLOADS_API.md`
 
 ## Validacao tecnica
 
@@ -73,7 +86,7 @@ Ultima validacao executada:
 
 - `.\mvnw.cmd test`
 - resultado: `BUILD SUCCESS`
-- cobertura atual da suite: `16 testes`
+- cobertura atual da suite: `22 testes`
 
 Casos importantes ja validados:
 
@@ -84,11 +97,12 @@ Casos importantes ja validados:
 - acesso sem token
 - acesso com perfil `OPERADOR`
 - acesso com perfil `ADMIN`
+- validacao de `ProdutoRequest`
+- validacao de `VendaRequest`
+- mapeamento dos DTOs de resposta
 
 ## O que falta para o backend MVP
 
-- criar `ProdutoRequest`, `VendaRequest`, `ItemVendaRequest` e `RelatorioDiaResponse`
-- consolidar padrao de resposta para produto, venda e relatorio
 - implementar `ProdutoService`
 - implementar `VendaService`
 - implementar `RelatorioService`
@@ -109,10 +123,10 @@ Casos importantes ja validados:
 
 ## Proximas 3 entregas recomendadas
 
-1. Fechar DTOs de produto, venda e relatorio.
-2. Implementar services de produto, venda e relatorio com testes.
-3. Expor controllers REST e validar tudo no Postman.
+1. Implementar services de produto, venda e relatorio com testes.
+2. Expor controllers REST e validar tudo no Postman.
+3. Criar `DataSeeder` com admin inicial e documentar o primeiro acesso.
 
 ## Risco principal atual
 
-O backend ja tem autenticacao e persistencia, mas ainda nao tem as regras principais de operacao do caixa. O risco agora nao esta mais na estrutura; esta em transformar a base pronta em fluxo real de venda, estoque e relatorio.
+O backend ja tem autenticacao, persistencia e contratos da API. O risco agora nao esta mais na estrutura nem no idioma da API; esta em transformar essa base em fluxo real de venda, estoque e relatorio com regras de negocio confiaveis.
