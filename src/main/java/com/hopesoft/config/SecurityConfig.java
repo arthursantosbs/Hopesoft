@@ -39,9 +39,14 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)
                 )
                 .authorizeHttpRequests(authorize -> authorize
+                        // Permitir acesso a arquivos estáticos
+                        .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/images/**").permitAll()
+                        // Permitir login sem autenticação
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        // Rotas protegidas por perfil
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/operador/**").hasAnyRole("ADMIN", "OPERADOR")
+                        // Todas as outras requisições precisam de autenticação
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

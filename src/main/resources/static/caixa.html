@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HopeSoft - Caixa</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>🛒 HopeSoft - Caixa</h1>
+                    <div id="user-info" style="font-size: 12px;"></div>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="caixa.html" class="active">💳 Caixa</a></li>
+                        <li><a href="produtos.html">📦 Produtos</a></li>
+                        <li><a href="relatorio.html">📊 Relatório</a></li>
+                    </ul>
+                    <button id="logout-btn">Sair</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="message"></div>
+
+        <div class="caixa-container">
+            <!-- Lista de Produtos -->
+            <div>
+                <div class="card">
+                    <h2>📦 Selecione Produtos</h2>
+                    <input type="text" id="search-produto" placeholder="🔍 Buscar produto..." style="margin-bottom: 15px;">
+                    <div id="produtos-list" style="max-height: 400px; overflow-y: auto;">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carrinho e Pagamento -->
+            <div>
+                <div class="card">
+                    <h2>🧾 Venda Atual</h2>
+
+                    <div id="carrinho-itens" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;">
+                        <p style="text-align: center; color: var(--text-secondary);">Nenhum item selecionado</p>
+                    </div>
+
+                    <div style="border-top: 2px solid var(--border-color); padding-top: 15px;">
+                        <div class="flex-between" style="margin-bottom: 10px;">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">R$ 0,00</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="forma-pagamento">💰 Forma de Pagamento</label>
+                            <select id="forma-pagamento">
+                                <option value="DINHEIRO">Dinheiro</option>
+                                <option value="PIX">PIX</option>
+                                <option value="DÉBITO">Débito</option>
+                                <option value="CRÉDITO">Crédito</option>
+                            </select>
+                        </div>
+
+                        <div id="valor-recebido-group" class="form-group">
+                            <label for="valor-recebido">💵 Valor Recebido</label>
+                            <input type="number" id="valor-recebido" placeholder="0.00" step="0.01" min="0">
+                        </div>
+
+                        <div id="troco-group" class="hidden">
+                            <div class="stat-box">
+                                <div class="stat-label">TROCO</div>
+                                <div class="stat-value" id="troco">R$ 0,00</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button type="button" id="btn-limpar" class="btn-warning" style="flex: 1;">
+                                🗑️ Limpar
+                            </button>
+                            <button type="button" id="btn-concluir" class="btn-success" style="flex: 1;">
+                                ✓ Concluir Venda
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <div class="modal-header">Confirmar Venda</div>
+            <p id="modal-message"></p>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" id="btn-confirmar" class="btn-success" style="flex: 1;">Confirmar</button>
+                <button type="button" id="btn-cancelar" class="btn-danger" style="flex: 1;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let user = null;
+        let produtos = [];
+        let carrinho = [];
+
+        // ===== INICIALIZAÇÃO =====
+        async function init() {
+            try {
+                if (!api.token) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                user = await api.getMe();
+                document.getElementById('user-info').innerHTML = `${user.nome} (${user.perfil})`;
+
+                await carregarProdutos();
+                setupEventListeners();
+            } catch (error) {
+                document.getElementById('message').innerHTML = `<div class="alert alert-error">Erro ao carregar dados: ${error.message}</div>`;
+            }
+        }
+
+        // ===== CARREGAR PRODUTOS =====
+        async function carregarProdutos() {
+            try {
+                produtos = await api.getProdutos();
+                renderizarProdutos(produtos);
+            } catch (error) {
+                document.getElementById('produtos-list').innerHTML = `<div class="alert alert-error">Erro ao carregar produtos</div>`;
+            }
+        }
+
+        function renderizarProdutos(lista) {
+            const container = document.getElementById('produtos-list');
+            if (lista.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhum produto disponível</p>';
+                return;
+            }
+
+            container.innerHTML = lista.map(p => `
+                <div class="produto-item" onclick="adicionarAoCarrinho(${p.id})">
+                    <div class="item-info">
+                        <div class="item-name">${p.nome}</div>
+                        <div class="item-price">R$ ${formatarMoeda(p.preco)}</div>
+                        <div class="item-stock">Estoque: ${p.estoque} ${p.estoqueBaixo ? '⚠️ BAIXO' : ''}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== CARRINHO =====
+        function adicionarAoCarrinho(produtoId) {
+            const produto = produtos.find(p => p.id === produtoId);
+            if (!produto || produto.estoque <= 0) {
+                showMessage('Produto sem estoque', 'error');
+                return;
+            }
+
+            const itemExistente = carrinho.find(i => i.id === produtoId);
+            if (itemExistente) {
+                if (itemExistente.quantidade < produto.estoque) {
+                    itemExistente.quantidade++;
+                } else {
+                    showMessage('Quantidade indisponível no estoque', 'warning');
+                }
+            } else {
+                carrinho.push({
+                    id: produtoId,
+                    nome: produto.nome,
+                    preco: produto.preco,
+                    quantidade: 1
+                });
+            }
+
+            renderizarCarrinho();
+        }
+
+        function removerDoCarrinho(produtoId) {
+            carrinho = carrinho.filter(i => i.id !== produtoId);
+            renderizarCarrinho();
+        }
+
+        function atualizarQuantidade(produtoId, quantidade) {
+            const item = carrinho.find(i => i.id === produtoId);
+            if (item) {
+                if (quantidade <= 0) {
+                    removerDoCarrinho(produtoId);
+                } else {
+                    const produto = produtos.find(p => p.id === produtoId);
+                    if (quantidade <= produto.estoque) {
+                        item.quantidade = quantidade;
+                        renderizarCarrinho();
+                    } else {
+                        showMessage('Quantidade excede o estoque', 'warning');
+                    }
+                }
+            }
+        }
+
+        function renderizarCarrinho() {
+            const container = document.getElementById('carrinho-itens');
+
+            if (carrinho.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhum item selecionado</p>';
+                atualizarTotais();
+                return;
+            }
+
+            container.innerHTML = carrinho.map(item => `
+                <div class="venda-item">
+                    <div class="venda-item-info">
+                        <div class="venda-item-name">${item.nome}</div>
+                        <div class="venda-item-price">R$ ${formatarMoeda(item.preco)} x ${item.quantidade}</div>
+                    </div>
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <button type="button" onclick="atualizarQuantidade(${item.id}, ${item.quantidade - 1})" class="btn-small btn-warning">-</button>
+                        <span style="min-width: 30px; text-align: center;">${item.quantidade}</span>
+                        <button type="button" onclick="atualizarQuantidade(${item.id}, ${item.quantidade + 1})" class="btn-small btn-success">+</button>
+                        <button type="button" onclick="removerDoCarrinho(${item.id})" class="btn-small btn-danger">🗑️</button>
+                    </div>
+                    <div class="venda-item-total">R$ ${formatarMoeda(item.preco * item.quantidade)}</div>
+                </div>
+            `).join('');
+
+            atualizarTotais();
+        }
+
+        function atualizarTotais() {
+            const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+            document.getElementById('subtotal').textContent = `R$ ${formatarMoeda(subtotal)}`;
+
+            // Atualizar troco se dinheiro
+            if (document.getElementById('forma-pagamento').value === 'DINHEIRO') {
+                atualizarTroco(subtotal);
+            }
+        }
+
+        function atualizarTroco(subtotal) {
+            const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
+            const troco = valorRecebido - subtotal;
+
+            const trocoGroup = document.getElementById('troco-group');
+            const trocoElement = document.getElementById('troco');
+
+            if (valorRecebido > 0) {
+                trocoGroup.classList.remove('hidden');
+                trocoElement.textContent = troco >= 0 ? `R$ ${formatarMoeda(troco)}` : `FALTA R$ ${formatarMoeda(Math.abs(troco))}`;
+                trocoElement.style.color = troco >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
+            } else {
+                trocoGroup.classList.add('hidden');
+            }
+        }
+
+        // ===== EVENTOS =====
+        function setupEventListeners() {
+            // Forma de pagamento
+            document.getElementById('forma-pagamento').addEventListener('change', (e) => {
+                const isDinheiro = e.target.value === 'DINHEIRO';
+                document.getElementById('valor-recebido-group').classList.toggle('hidden', !isDinheiro);
+                if (!isDinheiro) {
+                    document.getElementById('troco-group').classList.add('hidden');
+                }
+            });
+
+            // Valor recebido
+            document.getElementById('valor-recebido').addEventListener('input', () => {
+                const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+                atualizarTroco(subtotal);
+            });
+
+            // Buscar produto
+            document.getElementById('search-produto').addEventListener('input', (e) => {
+                const termo = e.target.value.toLowerCase();
+                const filtrados = produtos.filter(p =>
+                    p.nome.toLowerCase().includes(termo) ||
+                    p.codigoBarras?.toLowerCase().includes(termo)
+                );
+                renderizarProdutos(filtrados);
+            });
+
+            // Limpar carrinho
+            document.getElementById('btn-limpar').addEventListener('click', () => {
+                carrinho = [];
+                renderizarCarrinho();
+                showMessage('Carrinho limpo', 'info');
+            });
+
+            // Concluir venda
+            document.getElementById('btn-concluir').addEventListener('click', () => {
+                if (carrinho.length === 0) {
+                    showMessage('Adicione produtos ao carrinho', 'warning');
+                    return;
+                }
+
+                const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+                const formaPagamento = document.getElementById('forma-pagamento').value;
+                const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || null;
+
+                if (formaPagamento === 'DINHEIRO' && (!valorRecebido || valorRecebido < subtotal)) {
+                    showMessage('Informe um valor recebido válido', 'warning');
+                    return;
+                }
+
+                // Mostrar modal de confirmação
+                const modal = document.getElementById('confirmModal');
+                const subtotalFormatado = `R$ ${formatarMoeda(subtotal)}`;
+                const trocoFormatado = valorRecebido ? `R$ ${formatarMoeda(valorRecebido - subtotal)}` : 'N/A';
+
+                document.getElementById('modal-message').innerHTML = `
+                    <p><strong>Total:</strong> ${subtotalFormatado}</p>
+                    <p><strong>Forma de Pagamento:</strong> ${formaPagamento}</p>
+                    ${valorRecebido ? `<p><strong>Valor Recebido:</strong> R$ ${formatarMoeda(valorRecebido)}</p>` : ''}
+                    ${valorRecebido ? `<p><strong>Troco:</strong> ${trocoFormatado}</p>` : ''}
+                    <p style="margin-top: 15px; color: var(--text-secondary); font-size: 12px;">Confirmar conclusão desta venda?</p>
+                `;
+                modal.classList.add('active');
+
+                document.getElementById('btn-confirmar').onclick = async () => {
+                    await finalizarVenda(subtotal, formaPagamento, valorRecebido);
+                };
+            });
+
+            // Modal close
+            document.querySelector('.modal-close').addEventListener('click', () => {
+                document.getElementById('confirmModal').classList.remove('active');
+            });
+
+            document.getElementById('btn-cancelar').addEventListener('click', () => {
+                document.getElementById('confirmModal').classList.remove('active');
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                api.removeToken();
+                window.location.href = 'index.html';
+            });
+        }
+
+        // ===== FINALIZAR VENDA =====
+        async function finalizarVenda(subtotal, formaPagamento, valorRecebido) {
+            try {
+                document.getElementById('confirmModal').classList.remove('active');
+
+                const itens = carrinho.map(item => ({
+                    produtoId: item.id,
+                    quantidade: item.quantidade
+                }));
+
+                const payload = {
+                    itens,
+                    formaPagamento,
+                    valorRecebido: formaPagamento === 'DINHEIRO' ? valorRecebido : null
+                };
+
+                await api.registrarVenda(payload);
+
+                showMessage('✓ Venda concluída com sucesso!', 'success');
+                carrinho = [];
+                document.getElementById('valor-recebido').value = '';
+                renderizarCarrinho();
+
+                // Recarregar produtos
+                await carregarProdutos();
+
+            } catch (error) {
+                showMessage(`Erro ao concluir venda: ${error.message}`, 'error');
+            }
+        }
+
+        // ===== UTILITÁRIOS =====
+        function formatarMoeda(valor) {
+            return valor.toFixed(2).replace('.', ',');
+        }
+
+        function showMessage(msg, type) {
+            const container = document.getElementById('message');
+            const alertClass = `alert-${type === 'error' ? 'error' : type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'info'}`;
+            container.innerHTML = `<div class="alert ${alertClass}">${msg}</div>`;
+            setTimeout(() => { container.innerHTML = ''; }, 3000);
+        }
+
+        // Iniciar
+        init();
+    </script>
+</body>
+
+</html>
+
