@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HopeSoft | Caixa</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="topbar">
+                <div class="brand">
+                    <h1>HopeSoft Caixa</h1>
+                    <p>Venda assistida, estoque sincronizado e operacao por empresa.</p>
+                </div>
+
+                <div class="header-side">
+                    <div class="status-chip" id="user-info">Carregando usuario...</div>
+                    <nav class="nav-links">
+                        <a href="caixa.html" class="active">Caixa</a>
+                        <a href="produtos.html">Produtos</a>
+                        <a href="relatorio.html">Relatorio</a>
+                    </nav>
+                    <button class="button button-ghost no-print" id="logout-btn">Sair</button>
+                </div>
+            </div>
+        </header>
+
+        <div id="message"></div>
+
+        <main class="grid-two">
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <h2>Catalogo disponivel</h2>
+                        <p>Selecione itens ativos do estoque para montar a venda.</p>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <input class="search-input" id="search-produto" type="text" placeholder="Buscar por nome ou codigo">
+                </div>
+
+                <div id="produtos-list" class="product-grid">
+                    <div class="empty-state">Carregando produtos...</div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <h2>Venda atual</h2>
+                        <p>Revise o carrinho, informe o pagamento e conclua com seguranca.</p>
+                    </div>
+                </div>
+
+                <div id="carrinho-itens" class="product-grid">
+                    <div class="empty-state">Nenhum item no carrinho.</div>
+                </div>
+
+                <div class="summary-row summary-total">
+                    <span>Total da venda</span>
+                    <strong id="subtotal">R$ 0,00</strong>
+                </div>
+
+                <div class="field">
+                    <label for="forma-pagamento">Forma de pagamento</label>
+                    <select id="forma-pagamento">
+                        <option value="DINHEIRO">Dinheiro</option>
+                        <option value="PIX">PIX</option>
+                        <option value="CARTAO_DEBITO">Cartao de debito</option>
+                        <option value="CARTAO_CREDITO">Cartao de credito</option>
+                    </select>
+                </div>
+
+                <div class="field" id="valor-recebido-group">
+                    <label for="valor-recebido">Valor recebido</label>
+                    <input type="number" id="valor-recebido" placeholder="0.00" step="0.01" min="0">
+                </div>
+
+                <div id="troco-group" class="metric-card hidden">
+                    <div class="metric-label">
+                        <span>Troco</span>
+                        <span id="troco-status">Pronto</span>
+                    </div>
+                    <strong id="troco">R$ 0,00</strong>
+                </div>
+
+                <div class="toolbar no-print">
+                    <button class="button button-secondary" id="btn-limpar">Limpar carrinho</button>
+                    <button class="button" id="btn-concluir">Concluir venda</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="confirm-modal" class="modal">
+        <div class="modal-card">
+            <div class="panel-title">
+                <h3>Confirmar venda</h3>
+                <p id="modal-message">Revise os dados antes de finalizar.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="button button-secondary" id="btn-cancelar">Cancelar</button>
+                <button class="button" id="btn-confirmar">Confirmar venda</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let user = null;
+        let produtos = [];
+        let carrinho = [];
+
+        async function init() {
+            try {
+                if (!api.token) {
+                    window.location.assign("index.html");
+                    return;
+                }
+
+                user = await api.getMe();
+                document.getElementById("user-info").textContent = `${user.nome} | ${user.perfil}`;
+
+                await carregarProdutos();
+                renderizarCarrinho();
+                configurarEventos();
+            } catch (error) {
+                showPageMessage("message", `Erro ao carregar a tela: ${error.message}`, "error");
+            }
+        }
+
+        async function carregarProdutos() {
+            produtos = await api.getProdutos();
+            renderizarProdutos(produtos);
+        }
+
+        function renderizarProdutos(lista) {
+            const container = document.getElementById("produtos-list");
+
+            if (!lista.length) {
+                container.innerHTML = '<div class="empty-state">Nenhum produto disponivel.</div>';
+                return;
+            }
+
+            container.innerHTML = lista.map((produto) => `
+                <button class="product-card" type="button" onclick="adicionarAoCarrinho(${produto.id})">
+                    <div class="product-top">
+                        <div>
+                            <div class="product-name">${produto.nome}</div>
+                            <div>${produto.codigoBarras || "Sem codigo"}</div>
+                        </div>
+                        <span class="pill ${produto.estoqueBaixo ? "pill-warning" : ""}">
+                            Estoque ${produto.estoque}
+                        </span>
+                    </div>
+                    <div class="summary-row">
+                        <span>${produto.categoria?.nome || "Sem categoria"}</span>
+                        <strong>${formatCurrency(produto.preco)}</strong>
+                    </div>
+                </button>
+            `).join("");
+        }
+
+        function adicionarAoCarrinho(produtoId) {
+            const produto = produtos.find((item) => item.id === produtoId);
+            if (!produto) {
+                return;
+            }
+
+            if (produto.estoque <= 0) {
+                showPageMessage("message", "Produto sem estoque disponivel.", "warning");
+                return;
+            }
+
+            const itemExistente = carrinho.find((item) => item.id === produtoId);
+            if (itemExistente) {
+                if (itemExistente.quantidade >= produto.estoque) {
+                    showPageMessage("message", "Quantidade acima do estoque disponivel.", "warning");
+                    return;
+                }
+                itemExistente.quantidade += 1;
+            } else {
+                carrinho.push({
+                    id: produto.id,
+                    nome: produto.nome,
+                    preco: Number(produto.preco),
+                    quantidade: 1
+                });
+            }
+
+            renderizarCarrinho();
+        }
+
+        function atualizarQuantidade(produtoId, novaQuantidade) {
+            const item = carrinho.find((entry) => entry.id === produtoId);
+            const produto = produtos.find((entry) => entry.id === produtoId);
+
+            if (!item || !produto) {
+                return;
+            }
+
+            if (novaQuantidade <= 0) {
+                removerDoCarrinho(produtoId);
+                return;
+            }
+
+            if (novaQuantidade > produto.estoque) {
+                showPageMessage("message", "Quantidade acima do estoque disponivel.", "warning");
+                return;
+            }
+
+            item.quantidade = novaQuantidade;
+            renderizarCarrinho();
+        }
+
+        function removerDoCarrinho(produtoId) {
+            carrinho = carrinho.filter((item) => item.id !== produtoId);
+            renderizarCarrinho();
+        }
+
+        function renderizarCarrinho() {
+            const container = document.getElementById("carrinho-itens");
+
+            if (!carrinho.length) {
+                container.innerHTML = '<div class="empty-state">Nenhum item no carrinho.</div>';
+                atualizarResumo();
+                return;
+            }
+
+            container.innerHTML = carrinho.map((item) => `
+                <div class="sale-item">
+                    <div class="sale-top">
+                        <div>
+                            <div class="sale-name">${item.nome}</div>
+                            <div>${formatCurrency(item.preco)} por unidade</div>
+                        </div>
+                        <strong>${formatCurrency(item.preco * item.quantidade)}</strong>
+                    </div>
+
+                    <div class="sale-actions" style="margin-top: 12px;">
+                        <button class="button button-secondary button-small" type="button" onclick="atualizarQuantidade(${item.id}, ${item.quantidade - 1})">-</button>
+                        <span>${item.quantidade}</span>
+                        <button class="button button-secondary button-small" type="button" onclick="atualizarQuantidade(${item.id}, ${item.quantidade + 1})">+</button>
+                        <button class="button button-danger button-small" type="button" onclick="removerDoCarrinho(${item.id})">Remover</button>
+                    </div>
+                </div>
+            `).join("");
+
+            atualizarResumo();
+        }
+
+        function totalAtual() {
+            return carrinho.reduce((accumulator, item) => accumulator + (item.preco * item.quantidade), 0);
+        }
+
+        function atualizarResumo() {
+            const total = totalAtual();
+            document.getElementById("subtotal").textContent = formatCurrency(total);
+            atualizarTroco();
+        }
+
+        function atualizarTroco() {
+            const formaPagamento = document.getElementById("forma-pagamento").value;
+            const valorRecebido = Number(document.getElementById("valor-recebido").value || 0);
+            const total = totalAtual();
+            const trocoGroup = document.getElementById("troco-group");
+            const trocoElement = document.getElementById("troco");
+            const trocoStatus = document.getElementById("troco-status");
+
+            if (formaPagamento !== "DINHEIRO" || !valorRecebido) {
+                trocoGroup.classList.add("hidden");
+                return;
+            }
+
+            const troco = valorRecebido - total;
+            trocoGroup.classList.remove("hidden");
+
+            if (troco >= 0) {
+                trocoElement.textContent = formatCurrency(troco);
+                trocoElement.style.color = "var(--success)";
+                trocoStatus.textContent = "Pronto";
+            } else {
+                trocoElement.textContent = formatCurrency(Math.abs(troco));
+                trocoElement.style.color = "var(--danger)";
+                trocoStatus.textContent = "Falta receber";
+            }
+        }
+
+        function abrirModalConfirmacao() {
+            const total = totalAtual();
+            const formaPagamento = document.getElementById("forma-pagamento").value;
+            const valorRecebido = Number(document.getElementById("valor-recebido").value || 0);
+
+            document.getElementById("modal-message").innerHTML = `
+                <strong>Total:</strong> ${formatCurrency(total)}<br>
+                <strong>Pagamento:</strong> ${formatFormaPagamento(formaPagamento)}<br>
+                ${formaPagamento === "DINHEIRO" ? `<strong>Valor recebido:</strong> ${formatCurrency(valorRecebido)}` : ""}
+            `;
+            document.getElementById("confirm-modal").classList.add("active");
+        }
+
+        function fecharModalConfirmacao() {
+            document.getElementById("confirm-modal").classList.remove("active");
+        }
+
+        async function finalizarVenda() {
+            try {
+                const formaPagamento = document.getElementById("forma-pagamento").value;
+                const valorRecebido = document.getElementById("valor-recebido").value;
+                const payload = {
+                    itens: carrinho.map((item) => ({
+                        produtoId: item.id,
+                        quantidade: item.quantidade
+                    })),
+                    formaPagamento,
+                    valorRecebido: formaPagamento === "DINHEIRO" && valorRecebido ? Number(valorRecebido) : null
+                };
+
+                const venda = await api.registrarVenda(payload);
+                const mensagem = venda.troco && Number(venda.troco) > 0
+                    ? `Venda concluida. Troco: ${formatCurrency(venda.troco)}`
+                    : "Venda concluida com sucesso.";
+
+                fecharModalConfirmacao();
+                showPageMessage("message", mensagem, "success");
+                carrinho = [];
+                document.getElementById("valor-recebido").value = "";
+                renderizarCarrinho();
+                await carregarProdutos();
+            } catch (error) {
+                fecharModalConfirmacao();
+                showPageMessage("message", `Erro ao concluir venda: ${error.message}`, "error");
+            }
+        }
+
+        function configurarEventos() {
+            document.getElementById("search-produto").addEventListener("input", (event) => {
+                const termo = event.target.value.trim().toLowerCase();
+                const filtrados = produtos.filter((produto) =>
+                    produto.nome.toLowerCase().includes(termo) ||
+                    (produto.codigoBarras || "").toLowerCase().includes(termo)
+                );
+                renderizarProdutos(filtrados);
+            });
+
+            document.getElementById("forma-pagamento").addEventListener("change", (event) => {
+                const dinheiro = event.target.value === "DINHEIRO";
+                document.getElementById("valor-recebido-group").classList.toggle("hidden", !dinheiro);
+                if (!dinheiro) {
+                    document.getElementById("valor-recebido").value = "";
+                }
+                atualizarTroco();
+            });
+
+            document.getElementById("valor-recebido").addEventListener("input", atualizarTroco);
+
+            document.getElementById("btn-limpar").addEventListener("click", () => {
+                carrinho = [];
+                document.getElementById("valor-recebido").value = "";
+                renderizarCarrinho();
+                showPageMessage("message", "Carrinho limpo.", "info");
+            });
+
+            document.getElementById("btn-concluir").addEventListener("click", () => {
+                if (!carrinho.length) {
+                    showPageMessage("message", "Adicione itens ao carrinho antes de concluir.", "warning");
+                    return;
+                }
+
+                const formaPagamento = document.getElementById("forma-pagamento").value;
+                const valorRecebido = Number(document.getElementById("valor-recebido").value || 0);
+                if (formaPagamento === "DINHEIRO" && valorRecebido < totalAtual()) {
+                    showPageMessage("message", "O valor recebido precisa cobrir o total da venda.", "warning");
+                    return;
+                }
+
+                abrirModalConfirmacao();
+            });
+
+            document.getElementById("btn-cancelar").addEventListener("click", fecharModalConfirmacao);
+            document.getElementById("btn-confirmar").addEventListener("click", finalizarVenda);
+            document.getElementById("logout-btn").addEventListener("click", () => {
+                api.removeToken();
+                window.location.assign("index.html");
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

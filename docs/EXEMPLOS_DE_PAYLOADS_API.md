@@ -1,151 +1,147 @@
 # Exemplos de Payloads da API
 
-Atualizado em `2026-04-03`.
+Base local: `http://localhost:8080`
 
-Este arquivo resume os contratos definidos na fase de DTOs do HopeSoft.
+## Healthcheck
+
+```http
+GET /health
+```
 
 ## Login
 
-### Request
-
 ```json
+POST /auth/login
 {
   "email": "admin@hopesoft.com",
-  "senha": "123456"
+  "senha": "hopesoft123"
 }
 ```
 
-### Response
+## Usuario autenticado
 
-```json
-{
-  "token": "jwt-aqui",
-  "tipoToken": "Bearer",
-  "expiraEmSegundos": 3600,
-  "usuario": {
-    "id": 1,
-    "empresaId": 1,
-    "nome": "Administrador",
-    "email": "admin@hopesoft.com",
-    "perfil": "ADMIN"
-  }
-}
+```http
+GET /auth/me
+Authorization: Bearer {TOKEN}
 ```
 
-## Produto
+## Categorias
 
-### Request
+```http
+GET /categorias
+Authorization: Bearer {TOKEN}
+```
+
+## Criar produto
 
 ```json
+POST /produtos
+Authorization: Bearer {TOKEN}
 {
-  "nome": "Cafe 500g",
+  "nome": "Cafe Premium 500g",
   "codigoBarras": "7891234567890",
   "preco": 12.50,
   "estoque": 20,
   "estoqueMin": 5,
-  "categoriaId": 2,
+  "categoriaId": 1,
   "ativo": true
 }
 ```
 
-### Response
+## Atualizar produto
 
 ```json
+PUT /produtos/1
+Authorization: Bearer {TOKEN}
 {
-  "id": 10,
-  "empresaId": 1,
-  "nome": "Cafe 500g",
+  "nome": "Cafe Premium 500g - Atualizado",
   "codigoBarras": "7891234567890",
-  "preco": 12.50,
-  "estoque": 20,
+  "preco": 14.50,
+  "estoque": 25,
   "estoqueMin": 5,
-  "estoqueBaixo": false,
-  "ativo": true,
-  "categoria": {
-    "id": 2,
-    "nome": "Mercearia"
-  }
+  "categoriaId": 1,
+  "ativo": true
 }
 ```
 
-## Venda
+## Buscar produtos
 
-### Request
+```http
+GET /produtos
+GET /produtos/1
+GET /produtos/buscar?nome=cafe
+GET /produtos/estoque/baixo
+Authorization: Bearer {TOKEN}
+```
+
+## Desativar produto
+
+```http
+DELETE /produtos/1
+Authorization: Bearer {TOKEN}
+```
+
+## Registrar venda em dinheiro
 
 ```json
+POST /vendas
+Authorization: Bearer {TOKEN}
 {
   "itens": [
-    {
-      "produtoId": 10,
-      "quantidade": 2
-    },
-    {
-      "produtoId": 11,
-      "quantidade": 1
-    }
+    { "produtoId": 1, "quantidade": 2 },
+    { "produtoId": 2, "quantidade": 1 }
   ],
   "formaPagamento": "DINHEIRO",
   "valorRecebido": 50.00
 }
 ```
 
-### Response
+## Registrar venda em PIX
 
 ```json
+POST /vendas
+Authorization: Bearer {TOKEN}
 {
-  "id": 35,
-  "empresaId": 1,
-  "usuarioId": 4,
-  "usuarioNome": "Caixa 1",
-  "total": 31.00,
-  "formaPagamento": "DINHEIRO",
-  "troco": 19.00,
-  "criadoEm": "2026-04-03T15:00:00",
   "itens": [
-    {
-      "produtoId": 10,
-      "produtoNome": "Cafe 500g",
-      "quantidade": 2,
-      "precoUnit": 12.50,
-      "subtotal": 25.00
-    },
-    {
-      "produtoId": 11,
-      "produtoNome": "Bolo simples",
-      "quantidade": 1,
-      "precoUnit": 6.00,
-      "subtotal": 6.00
-    }
-  ]
+    { "produtoId": 1, "quantidade": 1 }
+  ],
+  "formaPagamento": "PIX"
 }
 ```
 
-## Relatorio do dia
-
-### Response
+## Registrar venda em cartao
 
 ```json
+POST /vendas
+Authorization: Bearer {TOKEN}
 {
-  "data": "2026-04-03",
-  "total": 190.00,
-  "quantidadeVendas": 12,
-  "totaisPorFormaPagamento": [
-    {
-      "formaPagamento": "PIX",
-      "total": 100.00
-    },
-    {
-      "formaPagamento": "DINHEIRO",
-      "total": 90.00
-    }
-  ]
+  "itens": [
+    { "produtoId": 1, "quantidade": 1 }
+  ],
+  "formaPagamento": "CARTAO_DEBITO"
 }
 ```
 
-## Regras de validacao ja definidas
+```json
+POST /vendas
+Authorization: Bearer {TOKEN}
+{
+  "itens": [
+    { "produtoId": 1, "quantidade": 1 }
+  ],
+  "formaPagamento": "CARTAO_CREDITO"
+}
+```
 
-- `ProdutoRequest` exige nome, preco, estoque e estoque minimo validos.
-- `ItemVendaRequest` exige `produtoId` e `quantidade` maiores que zero.
-- `VendaRequest` exige pelo menos um item.
-- `valorRecebido` e obrigatorio quando a forma de pagamento for `DINHEIRO`.
-- `valorRecebido` nao deve ser informado para formas de pagamento diferentes de `DINHEIRO`.
+## Relatorio diario
+
+```http
+GET /relatorios/dia?data=2026-04-10
+Authorization: Bearer {TOKEN}
+```
+
+## Erros importantes
+
+- `400` payload invalido, estoque insuficiente ou valor recebido menor que o total
+- `401` token ausente/invalido ou login incorreto
+- `404` entidade fora do contexto da empresa

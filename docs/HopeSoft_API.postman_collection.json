@@ -1,0 +1,367 @@
+{
+  "info": {
+    "name": "HopeSoft API",
+    "description": "Coleção oficial de endpoints da API HopeSoft - Fase 7 (Controllers)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Autenticação",
+      "description": "Endpoints de autenticação",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@hopesoft.com\",\n  \"senha\": \"hopesoft123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obter usuário autenticado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Produtos",
+      "description": "Endpoints para gerenciar produtos",
+      "item": [
+        {
+          "name": "Listar todos os produtos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar produto por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar produtos por nome",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos/buscar?nome=cafe",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos",
+                "buscar"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": "cafe"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar produtos com estoque baixo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos/estoque/baixo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos",
+                "estoque",
+                "baixo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar novo produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Cafe Premium 500g\",\n  \"codigoBarras\": \"7891234567890\",\n  \"preco\": 12.50,\n  \"estoque\": 20,\n  \"estoqueMin\": 5,\n  \"categoriaId\": 1,\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/produtos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Cafe Premium 500g - Atualizado\",\n  \"codigoBarras\": \"7891234567890\",\n  \"preco\": 14.50,\n  \"estoque\": 25,\n  \"estoqueMin\": 5,\n  \"categoriaId\": 1,\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/produtos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Desativar produto",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/produtos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "produtos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vendas",
+      "description": "Endpoints para gerenciar vendas",
+      "item": [
+        {
+          "name": "Registrar venda",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 2\n    },\n    {\n      \"produtoId\": 2,\n      \"quantidade\": 1\n    }\n  ],\n  \"formaPagamento\": \"DINHEIRO\",\n  \"valorRecebido\": 50.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vendas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "vendas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar venda com PIX",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 1\n    }\n  ],\n  \"formaPagamento\": \"PIX\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vendas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "vendas"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Relatórios",
+      "description": "Endpoints para gerar relatórios",
+      "item": [
+        {
+          "name": "Gerar relatório do dia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/relatorios/dia?data=2026-04-10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "relatorios",
+                "dia"
+              ],
+              "query": [
+                {
+                  "key": "data",
+                  "value": "2026-04-06"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
+

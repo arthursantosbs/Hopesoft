@@ -1,33 +1,40 @@
-### Teste 1: Login
+### Healthcheck
+GET http://localhost:8080/health
+
+### Login
 POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
   "email": "admin@hopesoft.com",
-  "senha": "123456"
+  "senha": "hopesoft123"
 }
 
-### Teste 2: Obter usuário autenticado
+### Usuario autenticado
 GET http://localhost:8080/auth/me
 Authorization: Bearer {TOKEN}
 
-### Teste 3: Listar todos os produtos
+### Categorias
+GET http://localhost:8080/categorias
+Authorization: Bearer {TOKEN}
+
+### Listar produtos
 GET http://localhost:8080/produtos
 Authorization: Bearer {TOKEN}
 
-### Teste 4: Buscar produto por ID
+### Buscar produto por ID
 GET http://localhost:8080/produtos/1
 Authorization: Bearer {TOKEN}
 
-### Teste 5: Buscar produtos por nome
+### Buscar produtos por nome
 GET http://localhost:8080/produtos/buscar?nome=cafe
 Authorization: Bearer {TOKEN}
 
-### Teste 6: Listar produtos com estoque baixo
+### Produtos com estoque baixo
 GET http://localhost:8080/produtos/estoque/baixo
 Authorization: Bearer {TOKEN}
 
-### Teste 7: Criar novo produto
+### Criar produto
 POST http://localhost:8080/produtos
 Authorization: Bearer {TOKEN}
 Content-Type: application/json
@@ -42,7 +49,7 @@ Content-Type: application/json
   "ativo": true
 }
 
-### Teste 8: Atualizar produto
+### Atualizar produto
 PUT http://localhost:8080/produtos/1
 Authorization: Bearer {TOKEN}
 Content-Type: application/json
@@ -57,152 +64,60 @@ Content-Type: application/json
   "ativo": true
 }
 
-### Teste 9: Desativar produto
+### Desativar produto
 DELETE http://localhost:8080/produtos/1
 Authorization: Bearer {TOKEN}
 
-### Teste 10: Registrar venda com dinheiro
+### Registrar venda em dinheiro
 POST http://localhost:8080/vendas
 Authorization: Bearer {TOKEN}
 Content-Type: application/json
 
 {
   "itens": [
-    {
-      "produtoId": 1,
-      "quantidade": 2
-    },
-    {
-      "produtoId": 2,
-      "quantidade": 1
-    }
+    { "produtoId": 1, "quantidade": 2 },
+    { "produtoId": 2, "quantidade": 1 }
   ],
   "formaPagamento": "DINHEIRO",
   "valorRecebido": 50.00
 }
 
-### Teste 11: Registrar venda com PIX
+### Registrar venda em PIX
 POST http://localhost:8080/vendas
 Authorization: Bearer {TOKEN}
 Content-Type: application/json
 
 {
   "itens": [
-    {
-      "produtoId": 1,
-      "quantidade": 1
-    }
+    { "produtoId": 1, "quantidade": 1 }
   ],
   "formaPagamento": "PIX"
 }
 
-### Teste 12: Registrar venda com DÉBITO
+### Registrar venda em cartao de debito
 POST http://localhost:8080/vendas
 Authorization: Bearer {TOKEN}
 Content-Type: application/json
 
 {
   "itens": [
-    {
-      "produtoId": 1,
-      "quantidade": 2
-    }
+    { "produtoId": 1, "quantidade": 1 }
   ],
-  "formaPagamento": "DÉBITO"
+  "formaPagamento": "CARTAO_DEBITO"
 }
 
-### Teste 13: Registrar venda com CRÉDITO
+### Registrar venda em cartao de credito
 POST http://localhost:8080/vendas
 Authorization: Bearer {TOKEN}
 Content-Type: application/json
 
 {
   "itens": [
-    {
-      "produtoId": 1,
-      "quantidade": 3
-    }
+    { "produtoId": 1, "quantidade": 1 }
   ],
-  "formaPagamento": "CRÉDITO"
+  "formaPagamento": "CARTAO_CREDITO"
 }
 
-### Teste 14: Gerar relatório do dia
-GET http://localhost:8080/relatorios/dia?data=2026-04-06
+### Relatorio diario
+GET http://localhost:8080/relatorios/dia?data=2026-04-10
 Authorization: Bearer {TOKEN}
-
-### Teste 15: Gerar relatório de outro dia
-GET http://localhost:8080/relatorios/dia?data=2026-04-05
-Authorization: Bearer {TOKEN}
-
-### Teste de Erro 1: Login com credenciais inválidas
-POST http://localhost:8080/auth/login
-Content-Type: application/json
-
-{
-  "email": "invalido@hopesoft.com",
-  "senha": "senha_errada"
-}
-
-### Teste de Erro 2: Produto sem nome
-POST http://localhost:8080/produtos
-Authorization: Bearer {TOKEN}
-Content-Type: application/json
-
-{
-  "nome": "",
-  "codigoBarras": "7891234567890",
-  "preco": 12.50,
-  "estoque": 20,
-  "estoqueMin": 5,
-  "categoriaId": 1,
-  "ativo": true
-}
-
-### Teste de Erro 3: Produto com preço negativo
-POST http://localhost:8080/produtos
-Authorization: Bearer {TOKEN}
-Content-Type: application/json
-
-{
-  "nome": "Produto Inválido",
-  "codigoBarras": "7891234567890",
-  "preco": -5.00,
-  "estoque": 20,
-  "estoqueMin": 5,
-  "categoriaId": 1,
-  "ativo": true
-}
-
-### Teste de Erro 4: Venda sem itens
-POST http://localhost:8080/vendas
-Authorization: Bearer {TOKEN}
-Content-Type: application/json
-
-{
-  "itens": [],
-  "formaPagamento": "DINHEIRO",
-  "valorRecebido": 50.00
-}
-
-### Teste de Erro 5: Venda em dinheiro sem valorRecebido
-POST http://localhost:8080/vendas
-Authorization: Bearer {TOKEN}
-Content-Type: application/json
-
-{
-  "itens": [
-    {
-      "produtoId": 1,
-      "quantidade": 2
-    }
-  ],
-  "formaPagamento": "DINHEIRO"
-}
-
-### Teste de Erro 6: Buscar produto inexistente
-GET http://localhost:8080/produtos/99999
-Authorization: Bearer {TOKEN}
-
-### Teste de Erro 7: Acessar endpoint sem token
-GET http://localhost:8080/produtos
-

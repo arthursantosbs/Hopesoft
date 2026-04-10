@@ -1,0 +1,7 @@
+.git
+.idea
+backend/target
+target
+app_output.log
+docs/*.docx
+docs/*.pdf

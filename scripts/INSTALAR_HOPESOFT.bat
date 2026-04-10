@@ -1,90 +1,48 @@
 @echo off
-REM ============================================================
-REM HOPESOFT - INSTALADOR PARA CLIENTES
-REM ============================================================
+setlocal
 
-setlocal enabledelayedexpansion
+set "SOURCE_DIR=%~dp0.."
+set "TARGET_DIR=C:\HopeSoft"
+set "DESKTOP=%USERPROFILE%\Desktop"
+set "SHORTCUT=%DESKTOP%\HopeSoft.lnk"
 
 echo.
-echo ╔════════════════════════════════════════════════════════════╗
-echo ║           HOPESOFT - INSTALADOR DE SISTEMA                 ║
-echo ║                                                            ║
-echo ║  Este programa vai instalar o HopeSoft na sua máquina     ║
-echo ╚════════════════════════════════════════════════════════════╝
+echo Preparando instalacao local do HopeSoft...
 echo.
 
-REM Verificar se Docker está instalado
-echo [1/4] Verificando Docker...
 docker --version >nul 2>&1
-
 if %errorlevel% neq 0 (
-    echo.
-    echo ❌ Docker não está instalado!
-    echo.
-    echo Por favor, instale Docker Desktop:
-    echo https://www.docker.com/products/docker-desktop
-    echo.
-    echo Após instalar, execute este programa novamente.
+    echo Docker Desktop nao foi encontrado.
+    echo Instale o Docker e execute este instalador novamente.
     pause
     exit /b 1
 )
 
-echo ✅ Docker encontrado
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
-REM Criar pasta se não existir
-echo [2/4] Preparando pasta...
-if not exist "C:\HopeSoft" (
-    mkdir "C:\HopeSoft"
+robocopy "%SOURCE_DIR%" "%TARGET_DIR%" /E /XD .git .idea backend\target target /XF app_output.log >nul
+if %errorlevel% geq 8 (
+    echo Falha ao copiar os arquivos para %TARGET_DIR%.
+    pause
+    exit /b 1
 )
 
-REM Copiar arquivos
-echo [3/4] Configurando sistema...
-if not exist "C:\HopeSoft\docker-compose.yml" (
-    echo Copiando arquivos...
-    REM Em produção, você faria download do GitHub aqui
-)
-
-echo ✅ Sistema configurado
-
-REM Criar atalho na área de trabalho
-echo [4/4] Criando atalho na área de trabalho...
-
-set "DESKTOP=%USERPROFILE%\Desktop"
-set "SCRIPT_PATH=C:\HopeSoft\INICIAR_HOPESOFT.bat"
-
-REM Criar arquivo VBS para criar atalho
 (
-echo Set oWS = WScript.CreateObject("WScript.Shell"^)
-echo sLinkFile = "%DESKTOP%\HopeSoft.lnk"
-echo Set oLink = oWS.CreateShortcut(sLinkFile^)
-echo oLink.TargetPath = "%SCRIPT_PATH%"
-echo oLink.WorkingDirectory = "C:\HopeSoft"
-echo oLink.IconLocation = "%SystemRoot%\System32\imageres.dll,1"
-echo oLink.Description = "Sistema HopeSoft - Frente de Caixa"
-echo oLink.Save
-) > "%TEMP%\create_shortcut.vbs"
+echo Set shell = CreateObject("WScript.Shell"^)
+echo Set shortcut = shell.CreateShortcut("%SHORTCUT%"^)
+echo shortcut.TargetPath = "%TARGET_DIR%\scripts\HopeSoft-App.bat"
+echo shortcut.WorkingDirectory = "%TARGET_DIR%"
+echo shortcut.IconLocation = "%SystemRoot%\System32\imageres.dll,1"
+echo shortcut.Description = "HopeSoft"
+echo shortcut.Save
+) > "%TEMP%\hopesoft_shortcut.vbs"
 
-cscript "%TEMP%\create_shortcut.vbs"
-del "%TEMP%\create_shortcut.vbs"
-
-echo ✅ Atalho criado
+cscript //nologo "%TEMP%\hopesoft_shortcut.vbs"
+del "%TEMP%\hopesoft_shortcut.vbs"
 
 echo.
-echo ╔════════════════════════════════════════════════════════════╗
-echo ║              ✅ INSTALAÇÃO CONCLUÍDA!                      ║
-echo ║                                                            ║
-echo ║  Um atalho "HopeSoft" foi criado na sua área de trabalho  ║
-echo ║                                                            ║
-echo ║  Para usar o sistema:                                     ║
-echo ║  1. Clique 2 vezes no atalho HopeSoft                     ║
-echo ║  2. Aguarde o sistema inicializar (2-5 minutos)           ║
-echo ║  3. Navegador abrirá automaticamente                      ║
-echo ║                                                            ║
-echo ║  Login padrão:                                            ║
-echo ║  Email:  admin@hopesoft.com                               ║
-echo ║  Senha:  hopesoft123                                      ║
-echo ║                                                            ║
-echo ╚════════════════════════════════════════════════════════════╝
+echo Instalacao concluida.
+echo Atalho criado em: %SHORTCUT%
+echo Login inicial: admin@hopesoft.com / hopesoft123
 echo.
 pause
-

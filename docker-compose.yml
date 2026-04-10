@@ -1,7 +1,4 @@
-version: '3.9'
-
 services:
-  # ===== BANCO DE DADOS =====
   postgres:
     image: postgres:16-alpine
     container_name: hopesoft-postgres
@@ -18,10 +15,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - hopesoft-network
+    restart: unless-stopped
 
-  # ===== APLICAÇÃO =====
   app:
     build:
       context: .
@@ -37,24 +32,16 @@ services:
       SPRING_DATASOURCE_PASSWORD: hopesoft123
       APP_JWT_SECRET: ${APP_JWT_SECRET:-hopesoft-secret-key-change-in-production}
       APP_JWT_EXPIRATION_MS: 86400000
+      APP_SEED_ENABLED: "true"
     ports:
       - "8080:8080"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/auth/me"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - hopesoft-network
-    # Reinicia automaticamente em caso de falha
     restart: unless-stopped
 
 volumes:
   postgres_data:
-    driver: local
-
-networks:
-  hopesoft-network:
-    driver: bridge
-
