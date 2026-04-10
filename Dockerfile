@@ -1,21 +1,20 @@
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-WORKDIR /app
+WORKDIR /app/backend
 
-COPY backend/.mvn backend/.mvn
-COPY backend/mvnw backend/mvnw
-COPY backend/pom.xml backend/pom.xml
-COPY backend/src backend/src
+COPY backend/pom.xml .
+COPY backend/src ./src
+COPY backend/.mvn ./.mvn
+COPY backend/mvnw .
 
-RUN chmod +x /app/backend/mvnw \
-    && cd /app/backend \
-    && ./mvnw -DskipTests package
+RUN chmod +x mvnw && \
+    ./mvnw clean package -DskipTests -q
 
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-COPY --from=builder /app/backend/target/hopesoft-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/backend/target/*.jar app.jar
 
 EXPOSE 8080
 
