@@ -11,9 +11,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidation(
@@ -101,6 +105,12 @@ public class GlobalExceptionHandler {
             String message,
             HttpServletRequest request
     ) {
+        if (status.is5xxServerError()) {
+            logger.error("Erro interno [{}]: {} no endpoint {}", code, message, request.getRequestURI());
+        } else {
+            logger.warn("Erro na requisicao [{}]: {} no endpoint {}", code, message, request.getRequestURI());
+        }
+        
         return ResponseEntity.status(status).body(
                 ApiErrorResponse.of(status, code, message, request.getRequestURI())
         );

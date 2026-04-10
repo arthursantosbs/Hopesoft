@@ -11,9 +11,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -21,6 +23,7 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         try {
+            log.info("Tentativa de login para o usuario: {}", request.email());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.senha())
             );
@@ -28,6 +31,7 @@ public class AuthService {
             HopesoftUserDetails userDetails = (HopesoftUserDetails) authentication.getPrincipal();
             String token = jwtService.generateToken(userDetails);
 
+            log.info("Login bem-sucedido para o usuario: {}", request.email());
             return new LoginResponse(
                     token,
                     "Bearer",
@@ -35,6 +39,7 @@ public class AuthService {
                     userDetails.toResponse()
             );
         } catch (BadCredentialsException e) {
+            log.warn("Falha de login para o usuario: {} - Credenciais invalidas", request.email());
             throw new InvalidCredentialsException("Email ou senha inválidos");
         }
     }
