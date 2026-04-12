@@ -42,7 +42,8 @@ public class GlobalExceptionHandler {
             ProdutoNotFoundException.class,
             CategoriaNotFoundException.class,
             EmpresaNotFoundException.class,
-            UsuarioNotFoundException.class
+            UsuarioNotFoundException.class,
+            ValeTrocaNotFoundException.class
     })
     public ResponseEntity<ApiErrorResponse> handleNotFound(
             RuntimeException exception,

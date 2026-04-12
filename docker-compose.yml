@@ -43,5 +43,17 @@ services:
       start_period: 40s
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./hopesoft-frontend
+      dockerfile: Dockerfile
+    container_name: hopesoft-frontend
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
 volumes:
   postgres_data:

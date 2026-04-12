@@ -2,6 +2,8 @@ package com.hopesoft.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import java.math.BigDecimal;
 
 public record ItemVendaRequest(
         @NotNull(message = "Produto e obrigatorio")
@@ -10,6 +12,9 @@ public record ItemVendaRequest(
 
         @NotNull(message = "Quantidade e obrigatoria")
         @Positive(message = "Quantidade deve ser maior que zero")
-        Integer quantidade
+        Integer quantidade,
+
+        @PositiveOrZero(message = "Desconto do item nao pode ser negativo")
+        BigDecimal descontoValor
 ) {
 }

@@ -26,10 +26,11 @@ echo.
 echo Aguardando a aplicacao responder...
 timeout /t 12 /nobreak >nul
 
-start "" "http://localhost:8080/index.html"
+start "" "http://localhost:3000"
 
 echo.
 echo HopeSoft iniciado.
-echo URL: http://localhost:8080
+echo Frontend: http://localhost:3000
+echo Backend:  http://localhost:8080
 echo.
 pause

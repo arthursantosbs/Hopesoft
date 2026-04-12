@@ -11,6 +11,7 @@ import com.hopesoft.model.FormaPagamento;
 import com.hopesoft.model.ItemVenda;
 import com.hopesoft.model.Perfil;
 import com.hopesoft.model.Produto;
+import com.hopesoft.model.StatusVenda;
 import com.hopesoft.model.Usuario;
 import com.hopesoft.model.Venda;
 import jakarta.validation.ConstraintViolation;
@@ -38,6 +39,10 @@ class DtoContractTest {
     void produtoRequestShouldRejectInvalidFields() {
         ProdutoRequest request = new ProdutoRequest(
                 "",
+                "",
+                "",
+                null,
+                null,
                 "12345678901234567890123456789012345678901234567890123456789012345",
                 new BigDecimal("0.00"),
                 -1,
@@ -49,6 +54,8 @@ class DtoContractTest {
         Set<String> messages = validateMessages(request);
 
         assertTrue(messages.contains("Nome do produto e obrigatorio"));
+        assertTrue(messages.contains("Modelo do produto e obrigatorio"));
+        assertTrue(messages.contains("Referencia e obrigatoria"));
         assertTrue(messages.contains("Codigo de barras deve ter no maximo 64 caracteres"));
         assertTrue(messages.contains("Preco deve ser maior que zero"));
         assertTrue(messages.contains("Estoque nao pode ser negativo"));
@@ -58,31 +65,35 @@ class DtoContractTest {
 
     @Test
     void vendaRequestShouldRejectInconsistentCashRules() {
-        VendaRequest semValorRecebido = new VendaRequest(
-                List.of(new ItemVendaRequest(10L, 1)),
-                FormaPagamento.DINHEIRO,
+        VendaRequest valorRecebidoEmPix = new VendaRequest(
+                List.of(new ItemVendaRequest(10L, 1, null)),
+                FormaPagamento.PIX,
+                new BigDecimal("50.00"),
+                null,
+                null,
+                null,
+                false,
+                null,
                 null
         );
 
-        VendaRequest valorRecebidoEmPix = new VendaRequest(
-                List.of(new ItemVendaRequest(10L, 1)),
-                FormaPagamento.PIX,
-                new BigDecimal("50.00")
-        );
-
-        Set<String> semValorMessages = validateMessages(semValorRecebido);
         Set<String> pixMessages = validateMessages(valorRecebidoEmPix);
 
-        assertTrue(semValorMessages.contains("Valor recebido e obrigatorio para pagamento em dinheiro"));
-        assertTrue(pixMessages.contains("Valor recebido so deve ser informado para pagamento em dinheiro"));
+        assertTrue(pixMessages.contains("Valor recebido legado so pode ser informado para pagamento em dinheiro"));
     }
 
     @Test
     void vendaRequestShouldValidateNestedItemsAndRequireAtLeastOne() {
-        VendaRequest semItens = new VendaRequest(List.of(), FormaPagamento.PIX, null);
+        VendaRequest semItens = new VendaRequest(List.of(), FormaPagamento.PIX, null, null, null, null, false, null, null);
         VendaRequest itemInvalido = new VendaRequest(
-                List.of(new ItemVendaRequest(null, 0)),
+                List.of(new ItemVendaRequest(null, 0, null)),
                 FormaPagamento.PIX,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
                 null
         );
 
@@ -98,6 +109,10 @@ class DtoContractTest {
     void requestsValidosShouldPassValidation() {
         ProdutoRequest produtoRequest = new ProdutoRequest(
                 "Cafe 500g",
+                "Cafe 500g",
+                "CAF-500",
+                "Marrom",
+                "UN",
                 "7891234567890",
                 new BigDecimal("12.50"),
                 20,
@@ -107,9 +122,15 @@ class DtoContractTest {
         );
 
         VendaRequest vendaRequest = new VendaRequest(
-                List.of(new ItemVendaRequest(7L, 2)),
+                List.of(new ItemVendaRequest(7L, 2, BigDecimal.ZERO)),
                 FormaPagamento.DINHEIRO,
-                new BigDecimal("30.00")
+                new BigDecimal("30.00"),
+                null,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                false,
+                null,
+                null
         );
 
         assertTrue(validator.validate(produtoRequest).isEmpty());
@@ -135,6 +156,11 @@ class DtoContractTest {
                 .id(9L)
                 .empresa(empresa)
                 .nome("Refrigerante 2L")
+                .modelo("Refrigerante 2L")
+                .referencia("REFRIG-2L")
+                .gradeGrupo("REFRIG-2L-GRADE")
+                .cor("Unico")
+                .tamanho("2L")
                 .codigoBarras("7890001112223")
                 .preco(new BigDecimal("9.50"))
                 .estoque(4)
@@ -156,10 +182,15 @@ class DtoContractTest {
                 .id(15L)
                 .empresa(empresa)
                 .usuario(usuario)
+                .subtotalBruto(new BigDecimal("19.00"))
+                .descontoTotal(BigDecimal.ZERO)
+                .acrescimoTotal(BigDecimal.ZERO)
                 .total(new BigDecimal("19.00"))
                 .formaPagamento(FormaPagamento.PIX)
+                .status(StatusVenda.FINALIZADA)
                 .troco(BigDecimal.ZERO)
                 .criadoEm(LocalDateTime.of(2026, 4, 3, 10, 30))
+                .pagamentos(List.of())
                 .build();
 
         ItemVenda itemVenda = ItemVenda.builder()
@@ -168,6 +199,10 @@ class DtoContractTest {
                 .produto(produto)
                 .quantidade(2)
                 .precoUnit(new BigDecimal("9.50"))
+                .subtotalBruto(new BigDecimal("19.00"))
+                .descontoValor(BigDecimal.ZERO)
+                .acrescimoValor(BigDecimal.ZERO)
+                .quantidadeDevolvida(0)
                 .subtotal(new BigDecimal("19.00"))
                 .build();
 
@@ -188,6 +223,7 @@ class DtoContractTest {
         assertEquals(1L, produtoResponse.empresaId());
         assertTrue(produtoResponse.estoqueBaixo());
         assertEquals("Bebidas", produtoResponse.categoria().nome());
+        assertEquals("Refrigerante 2L", produtoResponse.modelo());
 
         assertEquals("PIX", vendaResponse.formaPagamento());
         assertEquals("Caixa 1", vendaResponse.usuarioNome());

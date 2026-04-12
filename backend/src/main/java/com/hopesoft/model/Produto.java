@@ -34,7 +34,22 @@ public class Produto {
     @Column(nullable = false)
     private String nome;
 
-    @Column(name = "codigo_barras")
+    @Column(name = "modelo", nullable = false)
+    private String modelo;
+
+    @Column(name = "referencia", nullable = false)
+    private String referencia;
+
+    @Column(name = "grade_grupo", nullable = false)
+    private String gradeGrupo;
+
+    @Column(name = "cor")
+    private String cor;
+
+    @Column(name = "tamanho")
+    private String tamanho;
+
+    @Column(name = "codigo_barras", unique = true)
     private String codigoBarras;
 
     @Column(nullable = false)

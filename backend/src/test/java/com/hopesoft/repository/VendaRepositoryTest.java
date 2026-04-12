@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.hopesoft.model.Empresa;
 import com.hopesoft.model.FormaPagamento;
 import com.hopesoft.model.Perfil;
+import com.hopesoft.model.StatusVenda;
 import com.hopesoft.model.Usuario;
 import com.hopesoft.model.Venda;
 import java.math.BigDecimal;
@@ -97,8 +98,14 @@ class VendaRepositoryTest {
         Venda venda = Venda.builder()
                 .empresa(empresa)
                 .usuario(usuario)
+                .subtotalBruto(total)
+                .descontoTotal(BigDecimal.ZERO)
+                .acrescimoTotal(BigDecimal.ZERO)
                 .total(total)
                 .formaPagamento(FormaPagamento.DINHEIRO)
+                .status(StatusVenda.FINALIZADA)
+                .itens(List.of())
+                .pagamentos(List.of())
                 .build();
 
         Venda persisted = entityManager.persistAndFlush(venda);

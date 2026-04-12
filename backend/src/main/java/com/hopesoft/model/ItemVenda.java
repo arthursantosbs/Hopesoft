@@ -39,9 +39,24 @@ public class ItemVenda {
     @Column(nullable = false)
     private Integer quantidade;
 
+    @Column(name = "subtotal_bruto", nullable = false)
+    private BigDecimal subtotalBruto;
+
+    @Column(name = "desconto_valor", nullable = false)
+    @Builder.Default
+    private BigDecimal descontoValor = BigDecimal.ZERO;
+
+    @Column(name = "acrescimo_valor", nullable = false)
+    @Builder.Default
+    private BigDecimal acrescimoValor = BigDecimal.ZERO;
+
     @Column(name = "preco_unit", nullable = false)
     private BigDecimal precoUnit;
 
     @Column(nullable = false)
     private BigDecimal subtotal;
+
+    @Column(name = "quantidade_devolvida", nullable = false)
+    @Builder.Default
+    private Integer quantidadeDevolvida = 0;
 }

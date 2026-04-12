@@ -2,36 +2,45 @@
 
 ## 1. Visao do projeto
 
-HopeSoft e um sistema de frente de caixa para pequenas operacoes comerciais. O foco desta versao e entregar um fluxo confiavel de:
+HopeSoft e um sistema de PDV para operacao de loja com foco em velocidade de caixa e controle pratico de estoque.
 
-- login
-- cadastro e consulta de produtos
-- venda com baixa de estoque
-- relatorio diario
-- uso local com Docker
+Nesta versao o produto ja cobre:
+
+- login com JWT e perfis de acesso
+- cadastro de produtos por variante
+- grade de produto por cor e tamanho
+- codigo de barras por variante
+- alerta de estoque minimo
+- venda com pagamentos mistos
+- venda em espera
+- vale-troca
+- abertura, sangria, suprimento e fechamento de caixa
+- relatorios diarios
 
 ## 2. Etapa atual do projeto
 
-O projeto esta na fase de **MVP operacional fechado**.
+O projeto esta na fase de **MVP operacional avancado**.
 
 Ja entregue:
 
 - autenticacao JWT
-- isolamento por empresa nas rotas centrais
-- categorias, produtos, vendas e relatorio diario
-- frontend MVP servindo pelo proprio backend
-- scripts Windows para operacao local
+- isolamento multiempresa nos fluxos centrais
+- produtos, categorias, vendas e relatorio diario
+- matriz de produtos com variantes
+- impressao de etiqueta em ZPL ou EPL
+- fluxo de caixa com troco, espera, desconto controlado e sessao de caixa
+- frontend React operacional integrado ao mesmo repositorio do projeto
 - ambiente Docker com PostgreSQL
-- testes automatizados do backend
+- testes automatizados no backend
 
 Ainda falta para uma etapa mais madura de produto:
 
 - piloto real com loja
-- deploy em ambiente de producao
+- deploy de producao
 - backup e restore padronizados
 - observabilidade e alarmes
-- pipeline CI/CD
-- roadmap comercial e fiscal
+- CI/CD
+- integracao fiscal oficial com SEFAZ/SAT/MFE
 
 ## 3. Estrutura oficial do repositorio
 
@@ -39,16 +48,23 @@ Ainda falta para uma etapa mais madura de produto:
 Hopesoft/
 |-- backend/
 |   |-- src/main/java/com/hopesoft
-|   |-- src/main/resources
 |   |-- src/test
 |   |-- pom.xml
 |   |-- mvnw
 |   `-- mvnw.cmd
+|-- hopesoft-frontend/
+|   |-- client/src
+|   |-- server
+|   |-- package.json
+|   |-- pnpm-lock.yaml
+|   `-- vite.config.ts
 |-- docs/
 |   |-- EXEMPLOS_DE_PAYLOADS_API.md
 |   |-- HopeSoft_API.postman_collection.json
 |   |-- MANUAL_GERAL_HOPESOFT.md
-|   `-- MANUAL_INSTALACAO_CLIENTES.md
+|   |-- MANUAL_INSTALACAO_CLIENTES.md
+|   |-- MANUAL_OPERADOR_PDV.md
+|   `-- ROTEIRO_TESTE_PILOTO_AMANHA.md
 |-- http/
 |   `-- TESTES_HTTP_CLIENT.http
 |-- scripts/
@@ -56,8 +72,6 @@ Hopesoft/
 |   |-- INICIAR_HOPESOFT.bat
 |   |-- INSTALAR_HOPESOFT.bat
 |   `-- PARAR_HOPESOFT.bat
-|-- .dockerignore
-|-- Dockerfile
 |-- docker-compose.yml
 `-- README.md
 ```
@@ -72,6 +86,11 @@ Na raiz do repositorio:
 docker compose up --build
 ```
 
+Aplicacoes:
+
+- frontend: `http://localhost:3000`
+- backend: `http://localhost:8080`
+
 ### Opcao B - Execucao local
 
 No modulo `backend`:
@@ -80,9 +99,17 @@ No modulo `backend`:
 .\mvnw.cmd spring-boot:run
 ```
 
+No modulo `hopesoft-frontend`:
+
+```powershell
+pnpm install
+pnpm dev
+```
+
 ## 5. Enderecos e acesso
 
-- Aplicacao: `http://localhost:8080`
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8080`
 - Healthcheck: `http://localhost:8080/health`
 - Login: `POST /auth/login`
 
@@ -91,59 +118,81 @@ Usuarios iniciais:
 - `admin@hopesoft.com` / `hopesoft123`
 - `operador@hopesoft.com` / `hopesoft123`
 
-## 6. Validacao tecnica
+## 6. Modulos entregues
 
-Comando oficial de testes:
+### Backend
+
+- seguranca JWT
+- services e controllers de produtos, vendas, relatorios e caixa
+- grade de produto e consulta por codigo de barras
+- etiquetas para impressoras termicas
+- vale-troca e documento fiscal interno
+- tratamento de erros em JSON
+
+### Frontend
+
+- login integrado com JWT
+- dashboard com indicadores reais
+- produtos com grade, variantes e estoque baixo
+- caixa PDV com scanner global, F2 para busca e pagamentos mistos
+- tela de caixa para abertura, sangria, suprimento e fechamento
+- relatorios diarios por data
+
+## 7. Validacao tecnica
+
+Comandos oficiais:
 
 ```powershell
 cd backend
 .\mvnw.cmd test
 ```
 
-Estado validado nesta organizacao:
+```powershell
+cd hopesoft-frontend
+pnpm check
+pnpm build
+```
 
-- testes do backend passando
-- seed desligado nos testes
-- Docker alinhado com a pasta `backend/`
-- frontend sem categorias hardcoded
-- venda protegida por contexto de empresa
+Estado validado nesta rodada:
 
-## 7. Modulos entregues
+- backend com 22 testes passando
+- frontend com tipagem e build de producao passando
+- compose validado com backend, frontend e PostgreSQL
 
-### Backend
+## 8. Observacao fiscal
 
-- seguranca JWT
-- repositories, services e controllers
-- tratamento de erros em JSON
-- seed inicial configuravel
-- relatorio diario por forma de pagamento
+O backend ja possui a estrutura para registrar documento fiscal e preparar emissao de:
 
-### Frontend
+- `NFC-e`
+- `SAT`
+- `MFE`
 
-- `index.html` para login
-- `caixa.html` para venda
-- `produtos.html` para gestao de produtos
-- `relatorio.html` para fechamento diario
+Nesta etapa, isso ainda e uma **base de integracao**, nao a emissao legal completa. Para operar oficialmente e preciso integrar certificado, ambiente da SEFAZ e regras do estado do cliente.
 
-## 8. Proximos passos recomendados
+## 9. Proximos passos recomendados
 
 Prioridade alta:
 
-- testar em operacao real
+- testar em loja real
+- melhorar impressao termica e acionamento de gaveta
 - configurar backup automatico do banco
-- definir processo de deploy
-- monitorar falhas e tempo de resposta
+- definir deploy e monitoramento
 
 Prioridade media:
 
-- dashboard administrativo mais completo
-- historico detalhado de vendas
+- cadastro de clientes e historico de trocas
 - auditoria por operador
+- relatorios gerenciais mais ricos
 - importacao de produtos
 
 Prioridade futura:
 
-- modulo de clientes
+- fiscal oficial por estado
 - fiado estruturado
-- integracao fiscal
-- multi-loja com administracao central
+- multi-loja com visao central
+
+## 10. Guias para a rodada de teste
+
+- `MANUAL_INSTALACAO_CLIENTES.md` para instalar e iniciar
+- `MANUAL_OPERADOR_PDV.md` para uso do caixa
+- `ROTEIRO_TESTE_PILOTO_AMANHA.md` para validar o sistema em operacao

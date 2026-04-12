@@ -14,6 +14,20 @@ public record ProdutoRequest(
         @Size(max = 120, message = "Nome do produto deve ter no maximo 120 caracteres")
         String nome,
 
+        @NotBlank(message = "Modelo do produto e obrigatorio")
+        @Size(max = 120, message = "Modelo do produto deve ter no maximo 120 caracteres")
+        String modelo,
+
+        @NotBlank(message = "Referencia e obrigatoria")
+        @Size(max = 80, message = "Referencia deve ter no maximo 80 caracteres")
+        String referencia,
+
+        @Size(max = 40, message = "Cor deve ter no maximo 40 caracteres")
+        String cor,
+
+        @Size(max = 20, message = "Tamanho deve ter no maximo 20 caracteres")
+        String tamanho,
+
         @Size(max = 64, message = "Codigo de barras deve ter no maximo 64 caracteres")
         String codigoBarras,
 

@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Frontend React ###
+hopesoft-frontend/node_modules/
+hopesoft-frontend/dist/
+hopesoft-frontend/.manus-logs/

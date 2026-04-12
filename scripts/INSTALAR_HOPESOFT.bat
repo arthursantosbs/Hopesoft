@@ -43,6 +43,8 @@ del "%TEMP%\hopesoft_shortcut.vbs"
 echo.
 echo Instalacao concluida.
 echo Atalho criado em: %SHORTCUT%
+echo Frontend: http://localhost:3000
+echo Backend:  http://localhost:8080
 echo Login inicial: admin@hopesoft.com / hopesoft123
 echo.
 pause

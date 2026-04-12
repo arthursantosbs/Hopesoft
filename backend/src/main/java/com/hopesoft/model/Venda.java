@@ -45,14 +45,37 @@ public class Venda {
     @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL)
     private List<ItemVenda> itens;
 
+    @Column(name = "subtotal_bruto", nullable = false)
+    @Builder.Default
+    private BigDecimal subtotalBruto = BigDecimal.ZERO;
+
+    @Column(name = "desconto_total", nullable = false)
+    @Builder.Default
+    private BigDecimal descontoTotal = BigDecimal.ZERO;
+
+    @Column(name = "acrescimo_total", nullable = false)
+    @Builder.Default
+    private BigDecimal acrescimoTotal = BigDecimal.ZERO;
+
     @Column(nullable = false)
     private BigDecimal total;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "forma_pagamento", nullable = false)
+    @Column(name = "forma_pagamento")
     private FormaPagamento formaPagamento;
 
     private BigDecimal troco;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private StatusVenda status = StatusVenda.FINALIZADA;
+
+    @Column(length = 500)
+    private String observacao;
+
+    @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PagamentoVenda> pagamentos;
 
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;

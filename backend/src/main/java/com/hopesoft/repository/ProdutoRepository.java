@@ -14,6 +14,9 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     List<Produto> findByEmpresaOrderByNomeAsc(Empresa empresa);
     Optional<Produto> findByIdAndEmpresa(Long id, Empresa empresa);
     Optional<Produto> findByIdAndEmpresaAndAtivoTrue(Long id, Empresa empresa);
+    Optional<Produto> findByCodigoBarrasAndEmpresa(String codigoBarras, Empresa empresa);
+    boolean existsByCodigoBarras(String codigoBarras);
+    List<Produto> findByGradeGrupoAndEmpresaOrderByNomeAsc(String gradeGrupo, Empresa empresa);
 
     @Query("""
             SELECT p

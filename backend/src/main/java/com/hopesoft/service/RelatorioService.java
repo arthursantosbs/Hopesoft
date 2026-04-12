@@ -2,6 +2,7 @@ package com.hopesoft.service;
 
 import com.hopesoft.dto.RelatorioFormaPagamentoResponse;
 import com.hopesoft.model.Empresa;
+import com.hopesoft.repository.PagamentoVendaRepository;
 import com.hopesoft.repository.TotalPorFormaPagamentoProjection;
 import com.hopesoft.repository.VendaRepository;
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class RelatorioService {
 
     private final VendaRepository vendaRepository;
+    private final PagamentoVendaRepository pagamentoVendaRepository;
     private final EmpresaService empresaService;
 
     public BigDecimal totalDoDia(Long empresaId, LocalDate dia) {
@@ -37,7 +39,7 @@ public class RelatorioService {
         Empresa empresa = empresaService.buscarEmpresaPorId(empresaId);
         LocalDateTime inicio = dia.atStartOfDay();
         LocalDateTime fim = dia.atTime(LocalTime.MAX);
-        return vendaRepository.sumTotalByFormaPagamento(empresa, inicio, fim)
+        return pagamentoVendaRepository.sumTotalByFormaPagamento(empresa, inicio, fim)
                 .stream()
                 .map(this::toResponse)
                 .toList();

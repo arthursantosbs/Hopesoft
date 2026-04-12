@@ -16,4 +16,4 @@ if %errorlevel% neq 0 (
 
 docker compose up -d --build >nul 2>&1
 timeout /t 12 /nobreak >nul
-start "" "http://localhost:8080/index.html"
+start "" "http://localhost:3000"
